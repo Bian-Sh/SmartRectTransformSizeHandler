@@ -1,1 +1,3 @@
 # SmartRectTransformSizeHandler
+
+![](sizer.gif)
