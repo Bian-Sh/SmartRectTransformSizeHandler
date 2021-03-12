@@ -144,30 +144,20 @@ public class RectTransformResizerHandler : MonoBehaviour
         LayoutGroup layout = item.GetComponent<LayoutGroup>();
         if (layout)
         {
+            layout.padding.top *= factor;
+            layout.padding.bottom *= factor;
+            layout.padding.left *= factor;
+            layout.padding.right *= factor;
             if (layout is GridLayoutGroup)
             {
                 var grid = layout as GridLayoutGroup;
-                if (grid)
-                {
-                    grid.padding.top *= factor;
-                    grid.padding.bottom *= factor;
-                    grid.padding.left *= factor;
-                    grid.padding.right *= factor;
-                    grid.cellSize *= factor;
-                    grid.spacing *= factor;
-                }
+                grid.cellSize *= factor;
+                grid.spacing *= factor;
             }
             else
             {
                 var horizontalOrVertical = layout as HorizontalOrVerticalLayoutGroup;
-                if (horizontalOrVertical)
-                {
-                    horizontalOrVertical.padding.top *= factor;
-                    horizontalOrVertical.padding.bottom *= factor;
-                    horizontalOrVertical.padding.left *= factor;
-                    horizontalOrVertical.padding.right *= factor;
-                    horizontalOrVertical.spacing *= factor;
-                }
+                horizontalOrVertical.spacing *= factor;
             }
 #if UNITY_EDITOR
             if (needSetDirty) UnityEditor.EditorUtility.SetDirty(layout);
