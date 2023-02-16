@@ -19,8 +19,7 @@ class RectTransformResizerHandlerEditor : Editor
         GUILayout.Label(@"此脚本用于把 RectTransform 尺寸等比放大：
 1. 已经考虑到自身及父节点的 Layout 组件。
 2. 必须将 Game 视窗和CanvasScale 分辨率配置到你想要的
-3. 倍率是整型，1920 → 3840 → 7680 （2k→4k→8k）
-4. 游戏对象以 ~ 号结尾的过滤掉不会被处理，可以使用此方式跳过处理
+3. 游戏对象以 ~ 号结尾的过滤掉不会被处理，可以使用此方式跳过处理
 ");
     }
 }
@@ -28,13 +27,16 @@ class RectTransformResizerHandlerEditor : Editor
 
 public class RectTransformResizerHandler : MonoBehaviour
 {
-    [SerializeField] int factor = 2;
+    [SerializeField] float factor = 2;
     [SerializeField] bool needSetDirty = true; //RectTransform 会自动dirty 但是其他组件不会（具体哪些不会，不知道）
-
+    [SerializeField] bool needDestory = false;
     public void Action()
     {
         UpdateScale(null);
-        DestroyImmediate(this);
+        if (needDestory)
+        {
+            DestroyImmediate(this);
+        }
     }
     private void UpdateScale(Transform t)
     {
@@ -100,7 +102,7 @@ public class RectTransformResizerHandler : MonoBehaviour
                     rt.offsetMax = max;
                 }
                 //3. 针对左侧的 PosY+Height  与 top + bottom 的分情况赋值，规律同上
-                if (rt.anchorMax.y == rt.anchorMin.y) 
+                if (rt.anchorMax.y == rt.anchorMin.y)
                 {
                     var pos = rt.anchoredPosition;
                     pos[1] *= factor;
@@ -144,10 +146,22 @@ public class RectTransformResizerHandler : MonoBehaviour
         LayoutGroup layout = item.GetComponent<LayoutGroup>();
         if (layout)
         {
-            layout.padding.top *= factor;
-            layout.padding.bottom *= factor;
-            layout.padding.left *= factor;
-            layout.padding.right *= factor;
+            var temp = layout.padding.top;
+            temp = Mathf.FloorToInt(temp * factor);
+            layout.padding.top = temp;
+
+            temp = layout.padding.bottom;
+            temp = Mathf.FloorToInt(temp * factor);
+            layout.padding.bottom = temp;
+
+            temp = layout.padding.left;
+            temp = Mathf.FloorToInt(temp * factor);
+            layout.padding.left = temp;
+
+            temp = layout.padding.right;
+            temp = Mathf.FloorToInt(temp * factor);
+            layout.padding.right = temp;
+
             if (layout is GridLayoutGroup)
             {
                 var grid = layout as GridLayoutGroup;
@@ -167,11 +181,11 @@ public class RectTransformResizerHandler : MonoBehaviour
         Text text = item.GetComponent<Text>();
         if (text)
         {
-            text.fontSize *= factor;
+            text.fontSize = Mathf.CeilToInt(text.fontSize * factor);
             if (text.resizeTextForBestFit)
             {
-                text.resizeTextMaxSize *= factor;
-                text.resizeTextMinSize *= factor;
+                text.resizeTextMaxSize = Mathf.CeilToInt(text.resizeTextMaxSize * factor);
+                text.resizeTextMinSize = Mathf.CeilToInt(text.resizeTextMinSize * factor);
             }
 #if UNITY_EDITOR
             if (needSetDirty) UnityEditor.EditorUtility.SetDirty(text);
